@@ -1,0 +1,8 @@
+title: Launcher
+description: Not the greatest launcher.
+author: Daft_Freak
+splash:
+  file: ../assets/no-image.png
+icon:
+  file: ../assets/no-icon.png
+version: v0.0.0
