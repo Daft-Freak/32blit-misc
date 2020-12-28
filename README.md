@@ -10,3 +10,7 @@ Cycles through screen modes to test them.
 ## SD Test
 
 Small SD read benchmark. Misuses `api_private`, don't do that.
+
+## Assets
+
+There are a few fonts in `assets/fonts`.
