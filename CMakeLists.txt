@@ -17,4 +17,5 @@ endif()
 include (${32BLIT_PATH}/32blit.cmake)
 install (FILES ${PROJECT_DISTRIBS} DESTINATION .)
 
+add_subdirectory(screen-mode)
 add_subdirectory(sd-test)

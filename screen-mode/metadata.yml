@@ -1,0 +1,8 @@
+title: Screen Mode
+description: Screen mode test
+author: Daft_Freak
+splash:
+  file: ../assets/no-image.png
+icon:
+  file: ../assets/no-icon.png
+version: v1.0.0
