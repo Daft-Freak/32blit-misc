@@ -6,3 +6,5 @@ icon:
   file: icon.png
 splash:
   file: splash.png
+category: utility
+url: https://github.com/Daft-Freak/32blit-misc

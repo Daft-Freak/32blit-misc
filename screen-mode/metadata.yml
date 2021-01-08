@@ -6,3 +6,5 @@ splash:
 icon:
   file: ../assets/no-icon.png
 version: v1.0.0
+category: utility
+url: https://github.com/Daft-Freak/32blit-misc
