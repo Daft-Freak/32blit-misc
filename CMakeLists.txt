@@ -2,21 +2,23 @@
 cmake_minimum_required(VERSION 3.9)
 project(32blit-misc)
 
-set(32BLIT_PATH "../" CACHE PATH "Path to 32blit.cmake")
 set(PROJECT_DISTRIBS LICENSE README.md)
 
 # Build configuration; approach this with caution!
 if(MSVC)
-  add_compile_options("/W4" "/wd4244" "/wd4324")
+  add_compile_options("/W4" "/wd4244" "/wd4324" "/wd4458" "/wd4100")
 else()
-  add_compile_options("-Wall" "-Wextra" "-Wdouble-promotion")
+  add_compile_options("-Wall" "-Wextra" "-Wdouble-promotion" "-Wno-unused-parameter")
 endif()
-if(NOT EXISTS ${32BLIT_PATH}/32blit.cmake)
-  message(FATAL_ERROR "Define location of 32Blit API with -D32BLIT_PATH=<path to 32blit.cmake>")
-endif()
-include (${32BLIT_PATH}/32blit.cmake)
-install (FILES ${PROJECT_DISTRIBS} DESTINATION .)
+
+find_package (32BLIT CONFIG REQUIRED PATHS ../32blit-sdk)
 
 add_subdirectory(launcher-test)
 add_subdirectory(screen-mode)
 add_subdirectory(sd-test)
+
+# setup release packages
+install (FILES ${PROJECT_DISTRIBS} DESTINATION .)
+set (CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
+set (CPACK_GENERATOR "ZIP" "TGZ")
+include (CPack)
