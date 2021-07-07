@@ -1,0 +1,10 @@
+title: Audio Demo
+description: Interactively adjust various audio parameters
+author: Daft_Freak
+splash:
+  file: ../assets/no-image.png
+icon:
+  file: ../assets/no-icon.png
+version: v1.0.1
+category: utility
+url: https://github.com/Daft-Freak/32blit-misc
