@@ -48,11 +48,38 @@ void init() {
     ui_root.set_display_rect(Rect(screen.bounds.w / 2, 0, screen.bounds.w / 2, screen.bounds.h));
 }
 
+// 100% not stolen from launcher-shared
+void button_icon(const Point &pos, int button) {
+    Pen active_col(0xff, 0xff, 0xff);
+    Pen col(0x50, 0x64, 0x78);
+    Rect r(pos.x, pos.y + 3, 2, 2);
+
+    screen.pen = button == Button::Y ? active_col : col;
+    screen.rectangle(r);
+
+    screen.pen = button == Button::A ? active_col : col;
+    r.x += 6;
+    screen.rectangle(r);
+
+    screen.pen = button == Button::X ? active_col : col;
+    r.x -= 3; r.y = pos.y;
+    screen.rectangle(r);
+
+    screen.pen = button == Button::B ? active_col : col;
+    r.y += 6;
+    screen.rectangle(r);
+}
+
 void render(uint32_t time) {
     screen.pen = Pen(0, 0, 0);
     screen.clear();
 
     ui_root.render();
+
+    screen.text("    Attack/Release\n\n    Toggle Selected\n\nLEFT/RIGHT Small Step\n\n    + LEFT/RIGHT Big Step", minimal_font, {8, 8});
+    button_icon({8, 7}, Button::X);
+    button_icon({8, 25}, Button::A);
+    button_icon({8, 62}, Button::A);
 }
 
 // TODO: value changed callback/event/...
