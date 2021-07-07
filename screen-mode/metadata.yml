@@ -2,9 +2,9 @@ title: Screen Mode
 description: Screen mode test
 author: Daft_Freak
 splash:
-  file: ../assets/no-image.png
+  file: splash.png
 icon:
-  file: ../assets/no-icon.png
-version: v1.0.1
+  file: icon.png
+version: v1.0.2
 category: utility
 url: https://github.com/Daft-Freak/32blit-misc

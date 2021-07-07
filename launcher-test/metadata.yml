@@ -2,9 +2,9 @@ title: Launcher
 description: Not the greatest launcher.
 author: Daft_Freak
 splash:
-  file: ../assets/no-image.png
+  file: splash.png
 icon:
-  file: ../assets/no-icon.png
-version: v1.0.1
+  file: icon.png
+version: v1.0.2
 category: launcher
 url: https://github.com/Daft-Freak/32blit-misc
