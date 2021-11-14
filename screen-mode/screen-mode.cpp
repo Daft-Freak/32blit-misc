@@ -24,9 +24,11 @@ void init() {
     {  0,   0,   0},
     { 20,  30,  40},
     {255, 255, 255},
+    {255,   0,   0},
+    {  0, 255,   0},
     {  0,   0, 255}
   };
-  set_screen_palette(palette, 4);
+  set_screen_palette(palette, 6);
 }
 
 void render(uint32_t time_ms) {
@@ -59,7 +61,7 @@ void render(uint32_t time_ms) {
   screen.line(Point(  0, 239), Point(  0,   0));
 
   // paletted
-  screen.pen = Pen(3);
+  screen.pen = Pen(5);
 
   screen.line(Point(  0,   0), Point(319,   0));
   screen.line(Point(319,   0), Point(319, 239));
@@ -73,6 +75,28 @@ void render(uint32_t time_ms) {
   // in non-palette modes, this will blend the text a little darker
   screen.pen = Pen(2);
   screen.text(labels[current_mode], minimal_font, {10, 20});
+
+  // show some colour blocks
+  // red
+  screen.pen = Pen(255, 0, 0);
+  screen.rectangle({10, 40, 20, 20});
+
+  screen.pen = Pen(3);
+  screen.rectangle({10, 40, 20, 20});
+
+  // green
+  screen.pen = Pen(0, 255, 0);
+  screen.rectangle({30, 40, 20, 20});
+
+  screen.pen = Pen(4);
+  screen.rectangle({30, 40, 20, 20});
+
+  // blue
+  screen.pen = Pen(0, 0, 255);
+  screen.rectangle({50, 40, 20, 20});
+
+  screen.pen = Pen(5);
+  screen.rectangle({50, 40, 20, 20});
 }
 
 int mode_switch_counter = 0;
