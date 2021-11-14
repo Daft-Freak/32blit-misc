@@ -16,6 +16,7 @@ const char *labels[]{
 
 int current_mode = 0;
 const int num_screen_modes = 3;
+bool auto_mode = true;
 
 /* setup */
 void init() {
@@ -102,11 +103,24 @@ void render(uint32_t time_ms) {
 int mode_switch_counter = 0;
 void update(uint32_t time) {
 
-  if(++mode_switch_counter == 50) {
+  if(auto_mode && ++mode_switch_counter == 50) {
     current_mode = (current_mode + 1) % num_screen_modes;
     set_screen_mode(screen_modes[current_mode]);
 
     mode_switch_counter = 0;
+  }
+
+  // manual mode change
+  if(buttons.released & Button::A) {
+    auto_mode = false;
+    current_mode = (current_mode + 1) % num_screen_modes;
+    set_screen_mode(screen_modes[current_mode]);
+  } else if(buttons.released & Button::B) {
+    auto_mode = false;
+    current_mode = current_mode == 0 ? num_screen_modes - 1 : current_mode - 1;
+    set_screen_mode(screen_modes[current_mode]);
+  } else if(buttons.released & Button::X) {
+    auto_mode = true; // re-enable auto mode
   }
 }
 
