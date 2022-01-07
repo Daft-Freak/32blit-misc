@@ -2,25 +2,31 @@
 
 using namespace blit;
 
-ScreenMode screen_modes[]{
-  ScreenMode::lores,
-  ScreenMode::hires,
-  ScreenMode::hires_palette
+static std::tuple<ScreenMode, PixelFormat> screen_modes[]{
+  {ScreenMode::lores, PixelFormat::RGB},
+  {ScreenMode::lores, PixelFormat::RGB565},
+  {ScreenMode::lores, PixelFormat::P},
+  {ScreenMode::hires, PixelFormat::RGB},
+  {ScreenMode::hires, PixelFormat::RGB565},
+  {ScreenMode::hires, PixelFormat::P},
 };
 
-const char *labels[]{
-  "lores",
-  "hires",
-  "hires_palette"
+static const char *labels[]{
+  "lores RGB8",
+  "lores RGB565",
+  "lores P",
+  "hires RGB8",
+  "hires RGB565",
+  "hires P"
 };
 
 int current_mode = 0;
-const int num_screen_modes = 3;
+const int num_screen_modes = std::size(screen_modes);
 bool auto_mode = true;
 
 /* setup */
 void init() {
-  //set_screen_mode(ScreenMode::hires_palette);
+
   Pen palette[]{
     {  0,   0,   0},
     { 20,  30,  40},
@@ -103,24 +109,40 @@ void render(uint32_t time_ms) {
 int mode_switch_counter = 0;
 void update(uint32_t time) {
 
-  if(auto_mode && ++mode_switch_counter == 50) {
-    current_mode = (current_mode + 1) % num_screen_modes;
-    set_screen_mode(screen_modes[current_mode]);
+  auto prev_mode = [](){
 
+    while(true) {
+      current_mode = current_mode == 0 ? num_screen_modes - 1 : current_mode - 1;
+
+      auto &mode = screen_modes[current_mode];
+      if(set_screen_mode(std::get<0>(mode), std::get<1>(mode)))
+        break;
+    }
+  };
+
+  auto next_mode = [](){
+    while(true) {
+      current_mode = (current_mode + 1) % num_screen_modes;
+
+      auto &mode = screen_modes[current_mode];
+      if(set_screen_mode(std::get<0>(mode), std::get<1>(mode)))
+        break;
+    }
+  };
+
+  if(auto_mode && ++mode_switch_counter == 50) {
+    next_mode();
     mode_switch_counter = 0;
   }
 
   // manual mode change
   if(buttons.released & Button::A) {
     auto_mode = false;
-    current_mode = (current_mode + 1) % num_screen_modes;
-    set_screen_mode(screen_modes[current_mode]);
+    next_mode();
   } else if(buttons.released & Button::B) {
     auto_mode = false;
-    current_mode = current_mode == 0 ? num_screen_modes - 1 : current_mode - 1;
-    set_screen_mode(screen_modes[current_mode]);
+    prev_mode();
   } else if(buttons.released & Button::X) {
     auto_mode = true; // re-enable auto mode
   }
 }
-
