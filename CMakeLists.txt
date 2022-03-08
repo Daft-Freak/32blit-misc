@@ -1,5 +1,11 @@
 # Basic parameters; check that these match your project / environment
 cmake_minimum_required(VERSION 3.9)
+
+if(PICO_SDK_PATH)
+  include(${32BLIT_DIR}/32blit-pico/pico_sdk_import.cmake)
+  include(${32BLIT_DIR}/32blit-pico/pico_extras_import.cmake)
+endif()
+
 project(32blit-misc)
 
 set(PROJECT_DISTRIBS LICENSE README.md)
@@ -17,6 +23,7 @@ add_subdirectory(audio-demo)
 add_subdirectory(launcher-test)
 add_subdirectory(screen-mode)
 add_subdirectory(sd-test)
+add_subdirectory(timing-test)
 
 # setup release packages
 install (FILES ${PROJECT_DISTRIBS} DESTINATION .)
