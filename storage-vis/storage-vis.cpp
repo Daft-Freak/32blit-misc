@@ -43,10 +43,18 @@ struct RawMetadata {
   char author[17];
 };
 
+struct RawTypeMetadata {
+  char category[17];
+  char url[129];
+  uint8_t num_filetypes;
+  char filetypes[][5];
+};
+
 // game/space list
 struct StorageEntry {
   uint16_t start_block;
-  RawMetadata *metadata; // nullptr == empty
+  const RawMetadata *metadata; // nullptr == empty
+  blit::Surface *icon;
 };
 
 std::list<StorageEntry> storage_usage;
@@ -66,21 +74,39 @@ void init() {
     uint32_t header_size = ((BlitGameHeader *)ptr)->end & 0x1FFFFFF;
     auto meta_ptr = ptr + header_size;
 
-    RawMetadata *metadata = nullptr;
+    const RawMetadata *metadata = nullptr;
+    const blit::packed_image *icon_data = nullptr;
 
     if(memcmp(meta_ptr, "BLITMETA", 8) == 0) {
-      metadata = (RawMetadata *)(meta_ptr + 10);
+      auto meta_size = *(uint16_t *)(meta_ptr + 8);
+      meta_ptr += 10;
+      metadata = (const RawMetadata *)meta_ptr;
+
+      uint16_t offset = sizeof(RawMetadata);
+
+      // skip type info
+      if(offset != meta_size && memcmp(meta_ptr + offset, "BLITTYPE", 8) == 0) {
+        auto type_meta = (const RawTypeMetadata *)(meta_ptr + offset + 8);
+        offset += sizeof(RawTypeMetadata) + 8 + type_meta->num_filetypes * 5;
+      }
+
+      // next is the icon (then the splash)
+      if(offset != meta_size)
+        icon_data = (const blit:: packed_image *)(meta_ptr + offset);
     }
     // FIXME: else set placeholder
 
+    // setup new entry
     uint16_t block16 = block;
     uint16_t end_block = block16 + calc_num_blocks(size);
 
-    StorageEntry new_entry = {block16, metadata};
+    auto icon = icon_data ? blit::Surface::load(icon_data) : nullptr;
+
+    StorageEntry new_entry = {block16, metadata, icon};
 
     if(last_end != block) {
       // insert empty space
-      StorageEntry empty_entry = {last_end, nullptr};
+      StorageEntry empty_entry = {last_end, nullptr, nullptr};
       storage_usage.emplace_back(empty_entry);
     }
 
@@ -91,7 +117,7 @@ void init() {
 
   if(last_end != storage_size_blocks) {
     // insert empty space
-      StorageEntry empty_entry = {last_end, nullptr};
+      StorageEntry empty_entry = {last_end, nullptr, nullptr};
       storage_usage.emplace_back(empty_entry);
   }
 }
@@ -147,6 +173,12 @@ void render(uint32_t time_ms) {
       }
 
       screen.rectangle(r);
+
+      if(cur_entry->icon && x == start_x && y == start_y) {
+        // draw icon
+        screen.blit(cur_entry->icon, {0, 0, 8, 8}, {r.x, r.y});
+        continue;
+      }
     }
   }
 }
