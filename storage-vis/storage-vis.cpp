@@ -58,6 +58,7 @@ struct StorageEntry {
 };
 
 static std::list<StorageEntry> storage_usage;
+static std::list<StorageEntry>::iterator selected_entry;
 
 static const RawMetadata placeholder_meta {
   0,
@@ -156,6 +157,8 @@ void init() {
       StorageEntry empty_entry = {last_end, nullptr, nullptr};
       storage_usage.emplace_back(empty_entry);
   }
+
+  selected_entry = storage_usage.begin();
 }
 
 void render(uint32_t time_ms) {
@@ -171,6 +174,7 @@ void render(uint32_t time_ms) {
   int x_off = (screen.bounds.w - (num_cols * size_with_border)) / 2;
 
   auto cur_entry = storage_usage.begin();
+  auto next_entry = std::next(cur_entry);
   auto col = get_entry_colour(*cur_entry);
 
   // tile cur item started in
@@ -182,8 +186,9 @@ void render(uint32_t time_ms) {
       unsigned block_index = y * num_cols + x;
 
       // advance to next entry
-      if(cur_entry != storage_usage.end() && std::next(cur_entry)->start_block == block_index) {
-        cur_entry++;
+      if(next_entry != storage_usage.end() && next_entry->start_block == block_index) {
+        cur_entry = next_entry;
+        next_entry = std::next(cur_entry);
         col = get_entry_colour(*cur_entry);
 
         start_x = x;
@@ -214,12 +219,63 @@ void render(uint32_t time_ms) {
       if(cur_entry->icon && x == start_x && y == start_y) {
         // draw icon
         screen.blit(cur_entry->icon, {0, 0, 8, 8}, {r.x, r.y});
-        continue;
+      }
+
+      // draw border around selected
+      if(cur_entry == selected_entry) {
+        screen.pen = {255, 255, 255};
+
+        // left
+        if(x == 0 || (x == start_x && y == start_y))
+          screen.v_span({r.x - 1, r.y}, size_with_border);
+
+        // right
+        if(x == num_cols - 1 || (next_entry != storage_usage.end() && next_entry->start_block == block_index + 1))
+          screen.v_span({r.x + r.w, r.y}, size_with_border);
+
+        // top
+        if(y == start_y || (y == start_y + 1 && x < start_x))
+          screen.h_span({r.x - 1, r.y - 1}, r.w + 2);
+
+        // bottom
+        int end_x = num_cols - 1, end_y = num_rows - 1;
+        if(next_entry != storage_usage.end()) {
+          end_x = next_entry->start_block % num_cols;
+          end_y = next_entry->start_block / num_cols;
+        }
+
+        if(y == end_y || (y == end_y - 1 && x >= end_x))
+          screen.h_span({r.x - 1, r.y +r.h}, r.w + 2);
       }
     }
+  }
+
+  // show game info
+  screen.pen = {255, 255, 255};
+
+  int meta_y = y_off + num_rows * size_with_border + 10;
+
+  if(selected_entry->metadata) {
+    screen.text(selected_entry->metadata->title, minimal_font, {x_off, meta_y});
+    screen.text(selected_entry->metadata->author, minimal_font, {x_off, meta_y + 10});
+    screen.text(selected_entry->metadata->version, minimal_font, {x_off, meta_y + 20});
+  } else {
+    screen.text("Empty", minimal_font, {x_off, meta_y});
   }
 }
 
 void update(uint32_t time_ms) {
 
+  if(blit::buttons.released & blit::Button::DPAD_LEFT) {
+    if(selected_entry == storage_usage.begin())
+      selected_entry = std::prev(storage_usage.end());
+    else
+      selected_entry--;
+  }
+
+  if(blit::buttons.released & blit::Button::DPAD_RIGHT) {
+    selected_entry++;
+    if(selected_entry == storage_usage.end())
+      selected_entry = storage_usage.begin();
+  }
 }
