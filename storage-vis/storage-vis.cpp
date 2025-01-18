@@ -72,6 +72,32 @@ static uint16_t calc_num_blocks(uint32_t size) {
   return (size - 1) / storage_block_size + 1;
 }
 
+static blit::Pen get_entry_colour(StorageEntry &entry) {
+  if(!entry.metadata)
+    return {100, 100, 100}; // empty
+
+  if(!entry.icon)
+    return {255, 255, 255}; // no metadata/icon
+
+  // average the icon pixels (it's only 8x8)
+  float r = 0.0f, g = 0.0f, b = 0.0f;
+  int c = 0;
+
+  for(int y = 0; y < entry.icon->bounds.h; y++) {
+    for(int x = 0; x < entry.icon->bounds.w; x++) {
+      auto tmp = entry.icon->get_pixel({x, y});
+      if(tmp.a) {
+        r += tmp.r;
+        g += tmp.g;
+        b += tmp.b;
+        c++;
+      }
+    }
+  }
+
+  return {uint8_t(r / c), uint8_t(g / c), uint8_t(b / c)};
+}
+
 void init() {
   blit::set_screen_mode(blit::ScreenMode::hires);
 
@@ -145,6 +171,7 @@ void render(uint32_t time_ms) {
   int x_off = (screen.bounds.w - (num_cols * size_with_border)) / 2;
 
   auto cur_entry = storage_usage.begin();
+  auto col = get_entry_colour(*cur_entry);
 
   // tile cur item started in
   int start_x = 0, start_y = 0;
@@ -157,11 +184,11 @@ void render(uint32_t time_ms) {
       // advance to next entry
       if(cur_entry != storage_usage.end() && std::next(cur_entry)->start_block == block_index) {
         cur_entry++;
+        col = get_entry_colour(*cur_entry);
+
         start_x = x;
         start_y = y;
       }
-
-      Pen col = cur_entry->metadata ? Pen{255, 255, 255} : Pen{100, 100, 100};
 
       screen.pen = col;
 
