@@ -59,6 +59,15 @@ struct StorageEntry {
 
 std::list<StorageEntry> storage_usage;
 
+static const RawMetadata placeholder_meta {
+  0,
+  "UNKOWN",
+  "UNKNOWN",
+  "",
+  "v??",
+  "UNKNOWN"
+};
+
 static uint16_t calc_num_blocks(uint32_t size) {
   return (size - 1) / storage_block_size + 1;
 }
@@ -94,7 +103,8 @@ void init() {
       if(offset != meta_size)
         icon_data = (const blit:: packed_image *)(meta_ptr + offset);
     }
-    // FIXME: else set placeholder
+    else
+      metadata = &placeholder_meta; // to distinguish from empty space
 
     // setup new entry
     uint16_t block16 = block;
