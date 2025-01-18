@@ -57,11 +57,11 @@ struct StorageEntry {
   blit::Surface *icon;
 };
 
-std::list<StorageEntry> storage_usage;
+static std::list<StorageEntry> storage_usage;
 
 static const RawMetadata placeholder_meta {
   0,
-  "UNKOWN",
+  "UNKNOWN",
   "UNKNOWN",
   "",
   "v??",
