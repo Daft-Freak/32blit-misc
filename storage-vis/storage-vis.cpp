@@ -110,23 +110,43 @@ void render(uint32_t time_ms) {
 
   auto cur_entry = storage_usage.begin();
 
+  // tile cur item started in
+  int start_x = 0, start_y = 0;
+
   for(int y = 0; y < num_rows; y++) {
     for(int x = 0; x < num_cols; x++) {
 
       unsigned block_index = y * num_cols + x;
 
       // advance to next entry
-      if(cur_entry != storage_usage.end() && std::next(cur_entry)->start_block == block_index)
+      if(cur_entry != storage_usage.end() && std::next(cur_entry)->start_block == block_index) {
         cur_entry++;
+        start_x = x;
+        start_y = y;
+      }
 
       Pen col = cur_entry->metadata ? Pen{255, 255, 255} : Pen{100, 100, 100};
 
       screen.pen = col;
 
-      screen.rectangle({
+      Rect r{
         x_off + x * size_with_border, y_off + y * size_with_border,
         block_tile_size, block_tile_size
-      });
+      };
+
+      // join tiles if not first
+      if(x && (x != start_x || y != start_y)) {
+        r.x -= block_tile_border;
+        r.w += block_tile_border;
+      }
+
+      // join up if on third+ row or second row after the start
+      if(y != start_y && (y - start_y > 1 || x >= start_x)) {
+        r.y -= block_tile_border;
+        r.h += block_tile_border;
+      }
+
+      screen.rectangle(r);
     }
   }
 }
