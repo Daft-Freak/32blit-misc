@@ -1,5 +1,5 @@
 # Basic parameters; check that these match your project / environment
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.9...3.26)
 
 if(PICO_SDK_PATH)
   include(${32BLIT_DIR}/32blit-pico/pico_sdk_import.cmake)
