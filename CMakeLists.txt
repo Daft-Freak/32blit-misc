@@ -23,6 +23,7 @@ add_subdirectory(audio-demo)
 add_subdirectory(launcher-test)
 add_subdirectory(screen-mode)
 add_subdirectory(sd-test)
+add_subdirectory(storage-vis)
 add_subdirectory(timing-test)
 
 # setup release packages
