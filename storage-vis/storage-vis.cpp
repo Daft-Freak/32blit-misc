@@ -262,6 +262,17 @@ void render(uint32_t time_ms) {
   } else {
     screen.text("Empty", minimal_font, {x_off, meta_y});
   }
+
+  // display size of selected
+  next_entry = std::next(selected_entry);
+  uint16_t end_block = next_entry == storage_usage.end() ? storage_size_blocks : next_entry->start_block;
+
+  int size_blocks = end_block - selected_entry->start_block;
+  char buf[100];
+  snprintf(buf, sizeof(buf), "%i blocks\n(%lukB)\n", size_blocks, size_blocks * storage_block_size / 1024);
+
+  int right_x_off = screen.bounds.w - x_off;
+  screen.text(buf, minimal_font, {right_x_off, meta_y}, true, TextAlign::top_right);
 }
 
 void update(uint32_t time_ms) {
