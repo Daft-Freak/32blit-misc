@@ -11,7 +11,7 @@ const auto &anim_font = sans_bold_italic_font; //minimal_font;
 const float zoom_scale = 3.75f;
 const Vec2 swirl_start(-0.275f, 0.4f); // these are fractions of the screen size
 const Vec2 swirl_end(0.0f, -0.005f);   //
-const float bounce_dist = 0.0625;      //
+const float bounce_dist = 0.1f;        //
 const int bounce_count = 3;
 
 const Vec3 colours[] { // HSV
