@@ -2,27 +2,105 @@
 
 using namespace blit;
 
-static std::tuple<ScreenMode, PixelFormat> screen_modes[]{
-  {ScreenMode::lores, PixelFormat::RGB},
-  {ScreenMode::lores, PixelFormat::RGB565},
-  {ScreenMode::lores, PixelFormat::P},
-  {ScreenMode::hires, PixelFormat::RGB},
-  {ScreenMode::hires, PixelFormat::RGB565},
-  {ScreenMode::hires, PixelFormat::P},
+static std::tuple<ScreenMode, Size> screen_modes[]{
+  {ScreenMode::lores, {}},
+  {ScreenMode::hires, {}},
+
+  // gba modes
+  {ScreenMode::lores, {240, 160}},
+  {ScreenMode::hires, {240, 160}},
+
+  // picovision modes
+  {ScreenMode::lores, {640, 480}},
+  {ScreenMode::hires, {640, 480}},
+  {ScreenMode::lores, {720, 480}},
+  {ScreenMode::hires, {720, 480}},
+  {ScreenMode::lores, {720, 400}},
+  {ScreenMode::hires, {720, 400}},
+  {ScreenMode::lores, {720, 576}},
+  {ScreenMode::hires, {720, 576}},
+
+  // picovision "wide" modes
+  {ScreenMode::lores, {800, 600}},
+  {ScreenMode::hires, {800, 600}},
+  {ScreenMode::lores, {800, 480}},
+  {ScreenMode::hires, {800, 480}},
+  {ScreenMode::lores, {800, 450}},
+  {ScreenMode::hires, {800, 450}},
+  {ScreenMode::lores, {960, 540}},
+  {ScreenMode::hires, {960, 540}},
+  {ScreenMode::lores, {1280, 720}},
+  {ScreenMode::hires, {1280, 720}},
+
+  // silly modes
+  {ScreenMode::hires, {212, 160}}, // ~VGA / 3
+  {ScreenMode::hires, {128,  96}}, // VGA / 5
+  {ScreenMode::hires, {320, 120}}, // w / 2, h / 4
+  {ScreenMode::hires, {160, 240}}, // w / 4, h / 2
+  {ScreenMode::hires, {160, 480}}, // w / 4, h / 1
+  {ScreenMode::hires, {640, 120}}, // w / 1, h / 4
+  // silly probably single-buffered modes
+  {ScreenMode::hires, {640, 240}},
+  {ScreenMode::hires, {320, 480}},
 };
 
-static const char *labels[]{
-  "lores RGB8",
-  "lores RGB565",
-  "lores P",
-  "hires RGB8",
-  "hires RGB565",
-  "hires P"
+
+static PixelFormat screen_formats[]{
+  PixelFormat::RGB,
+  PixelFormat::RGB565,
+  PixelFormat::BGR555, // picovision
+  PixelFormat::P,
 };
 
-int current_mode = 0;
+static const char *mode_labels[]{
+  "lores",
+  "hires",
+
+  "240x160 lores",
+  "240x160 hires",
+
+  "640x480 lores",
+  "640x480 hires",
+  "720x480 lores",
+  "720x480 hires",
+  "720x400 lores",
+  "720x400 hires",
+  "720x576 lores",
+  "720x576 hires",
+
+  "800x600 lores",
+  "800x600 hires",
+  "800x480 lores",
+  "800x480 hires",
+  "800x450 lores",
+  "800x450 hires",
+  "960x540 lores",
+  "960x540 hires",
+  "1280x720 lores",
+  "1280x720 hires",
+
+  // silly
+  "212x160",
+  "128x96",
+  "320x120",
+  "160x240",
+  "160x480",
+  "640x120",
+  "640x240",
+  "320x480",
+};
+
+static const char *format_labels[]{
+  "RGB8",
+  "RGB565",
+  "BGR555",
+  "P"
+};
+
+static int current_mode = 0, current_format = 0;
 const int num_screen_modes = std::size(screen_modes);
-bool auto_mode = true;
+const int num_screen_formats = std::size(screen_formats);
+bool auto_mode = false;//true;
 
 /* setup */
 void init() {
@@ -77,11 +155,13 @@ void render(uint32_t time_ms) {
 
   // current mode label
   screen.pen = Pen(0xFF, 0xFF, 0xFF);
-  screen.text(labels[current_mode], minimal_font, {10, 20});
+  screen.text(mode_labels[current_mode], minimal_font, {10, 20});
+  screen.text(format_labels[current_format], minimal_font, {10, 30});
 
   // in non-palette modes, this will blend the text a little darker
   screen.pen = Pen(2);
-  screen.text(labels[current_mode], minimal_font, {10, 20});
+  screen.text(mode_labels[current_mode], minimal_font, {10, 20});
+  screen.text(format_labels[current_format], minimal_font, {10, 30});
 
   // show some colour blocks
   // red
@@ -112,20 +192,36 @@ void update(uint32_t time) {
   auto prev_mode = [](){
 
     while(true) {
-      current_mode = current_mode == 0 ? num_screen_modes - 1 : current_mode - 1;
+      // decrement format
+      current_format--;
+
+      // first format, decrment mode
+      if(current_format < 0) {
+        current_format = num_screen_formats - 1;
+        current_mode = current_mode == 0 ? num_screen_modes - 1 : current_mode - 1;
+      }
 
       auto &mode = screen_modes[current_mode];
-      if(set_screen_mode(std::get<0>(mode), std::get<1>(mode)))
+      auto format = screen_formats[current_format];
+      if(set_screen_mode(std::get<0>(mode), format, std::get<1>(mode)))
         break;
     }
   };
 
   auto next_mode = [](){
     while(true) {
-      current_mode = (current_mode + 1) % num_screen_modes;
+      // increment format
+      current_format++;
+
+      // last format, increment mode
+      if(current_format == num_screen_formats) {
+        current_format = 0;
+        current_mode = (current_mode + 1) % num_screen_modes;
+      }
 
       auto &mode = screen_modes[current_mode];
-      if(set_screen_mode(std::get<0>(mode), std::get<1>(mode)))
+      auto format = screen_formats[current_format];
+      if(set_screen_mode(std::get<0>(mode), format, std::get<1>(mode)))
         break;
     }
   };
