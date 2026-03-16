@@ -21,6 +21,7 @@ find_package (32BLIT CONFIG REQUIRED PATHS ../32blit-sdk)
 
 add_subdirectory(audio-demo)
 add_subdirectory(launcher-test)
+add_subdirectory(logo-anim)
 add_subdirectory(screen-mode)
 add_subdirectory(sd-test)
 add_subdirectory(storage-vis)
